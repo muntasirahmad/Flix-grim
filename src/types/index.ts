@@ -33,8 +33,10 @@ export interface ChatSession {
 export interface AppSettings {
   geminiKey: string;
   chatgptKey: string;
+  claudeKey: string;
   kimiKey: string;
   deepseekKey: string;
+  qwenKey: string;
   groqKey: string;
   glmKey: string;
   systemInstruction: string;

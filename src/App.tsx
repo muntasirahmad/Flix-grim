@@ -87,8 +87,10 @@ const DEFAULT_GEMINI_KEY = '';
 const DEFAULT_SETTINGS: AppSettings = {
   geminiKey: DEFAULT_GEMINI_KEY,
   chatgptKey: '',
+  claudeKey: '',
   kimiKey: '',
   deepseekKey: '',
+  qwenKey: '',
   groqKey: '',
   glmKey: '',
   systemInstruction: '',
@@ -96,7 +98,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
   soundEnabled: true,
   streamEnabled: true,
-  activeModels: ['gemini', 'chatgpt', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
+  activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
 };
 
 export default function App() {
@@ -372,7 +374,8 @@ export default function App() {
 
       // Attempt live streaming from server
       let streamSucceeded = false;
-      try {
+      if (selectedModel.id === 'gemini' || selectedModel.id === 'glm') {
+        try {
         const streamRes = await fetch('/api/chat/stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -385,8 +388,10 @@ export default function App() {
             userKeys: {
               gemini: settings.geminiKey,
               chatgpt: settings.chatgptKey,
+              claude: settings.claudeKey,
               kimi: settings.kimiKey,
               deepseek: settings.deepseekKey,
+              qwen: settings.qwenKey,
               groq: settings.groqKey,
               glm: settings.glmKey,
             },
@@ -435,8 +440,9 @@ export default function App() {
             }
           }
         }
-      } catch (streamErr) {
-        console.warn('Stream failed, falling back to batch API:', streamErr);
+        } catch (streamErr) {
+          console.warn('Stream failed, falling back to batch API:', streamErr);
+        }
       }
 
       // If streaming was empty or failed, fallback to standard /api/chat
@@ -453,8 +459,10 @@ export default function App() {
             userKeys: {
               gemini: settings.geminiKey,
               chatgpt: settings.chatgptKey,
+              claude: settings.claudeKey,
               kimi: settings.kimiKey,
               deepseek: settings.deepseekKey,
+              qwen: settings.qwenKey,
               groq: settings.groqKey,
               glm: settings.glmKey,
             },

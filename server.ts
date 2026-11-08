@@ -32,6 +32,9 @@ async function startServer() {
       status: 'ok',
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
       hasGlmKey: Boolean(process.env.GLM_API_KEY && process.env.GLM_API_KEY !== 'MY_GLM_API_KEY'),
+      hasOpenAiKey: Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'MY_OPENAI_API_KEY'),
+      hasAnthropicKey: Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'MY_ANTHROPIC_API_KEY'),
+      hasQwenKey: Boolean(process.env.QWEN_API_KEY && process.env.QWEN_API_KEY !== 'MY_QWEN_API_KEY'),
       hasCloudSql: Boolean(process.env.SQL_HOST && process.env.SQL_DB_NAME),
       hasFirebase: true,
       app: 'Flix Grim AI',
@@ -239,7 +242,8 @@ async function startServer() {
 
       const modelNames: Record<string, string> = {
         gemini: 'Google Gemini (Flix Grim Auto)',
-        chatgpt: 'ChatGPT (OpenAI GPT-4o)',
+        chatgpt: 'GPT-5 (OpenAI)',
+        claude: 'Claude (Anthropic)',
         kimi: 'Kimi AI (Moonshot)',
         deepseek: 'DeepSeek (R1/V3)',
         qwen: 'Qwen 2.5 (Alibaba)',
@@ -254,7 +258,9 @@ async function startServer() {
         gemini:
           'You are Flix Grim Auto powered by Google Gemini 3.8 Flash. You are insightful, fast, and warm. Provide direct, authoritative answers to user queries with Google Search grounding. If user asks in Hindi or Hinglish, answer naturally in Hindi or Hinglish.',
         chatgpt:
-          'You are ChatGPT (OpenAI GPT-4o). You provide balanced, articulate, and well-structured answers using clean markdown, lists, and code blocks. Match the user language (Hindi, Hinglish, or English).',
+          'You are GPT-5 by OpenAI. Provide accurate, articulate, well-structured answers using clean markdown. Match the user language (Hindi, Hinglish, or English).',
+        claude:
+          'You are Claude by Anthropic. Be thoughtful, precise, transparent about uncertainty, and helpful. Match the user language (Hindi, Hinglish, or English).',
         deepseek:
           'You are DeepSeek-R1, the leading open reasoning AI. For every reasoning question, you MUST show your internal deliberation inside a <think>...</think> block, followed by the definitive final answer. Fluent in Hindi, Hinglish, and English.',
         qwen:
@@ -267,7 +273,7 @@ async function startServer() {
           'You are GLM-5 by Z.ai. You are a bilingual reasoning powerhouse with deep expertise in coding, full-stack engineering, algorithms, and long-horizon agentic tasks. Answer naturally in Hindi, Hinglish, or English.',
       };
 
-      // 1. Check if user provided direct Provider Key (Groq, DeepSeek, OpenAI, Kimi, GLM)
+      // 1. Check if user provided a direct provider key.
       if (modelId === 'groq' && userKeys.groq) {
         try {
           const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -360,7 +366,7 @@ async function startServer() {
               Authorization: `Bearer ${userKeys.chatgpt}`,
             },
             body: JSON.stringify({
-              model: 'gpt-4o',
+              model: 'gpt-5',
               messages: [
                 { role: 'system', content: systemInstruction || modelPersonas.chatgpt },
                 ...conversation.map((m: any) => ({
@@ -377,11 +383,94 @@ async function startServer() {
             if (text) {
               return res.json({
                 text,
-                model: 'ChatGPT (OpenAI GPT-4o)',
+                model: 'GPT-5 (OpenAI)',
                 provider: 'OpenAI Cloud (Direct API)',
                 isLive: true,
                 status: 'success',
               });
+            }
+          }
+
+          if (modelId === 'claude' && (userKeys.claude || process.env.ANTHROPIC_API_KEY)) {
+            try {
+              const anthropicKey = (userKeys.claude || process.env.ANTHROPIC_API_KEY || '').trim();
+              const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-api-key': anthropicKey,
+                  'anthropic-version': '2023-06-01',
+                },
+                body: JSON.stringify({
+                  model: 'claude-sonnet-4-5',
+                  max_tokens: 4096,
+                  system: systemInstruction || modelPersonas.claude,
+                  messages: conversation
+                    .filter((m: any) => m.role !== 'system')
+                    .map((m: any) => ({
+                      role: m.role === 'ai' ? 'assistant' : m.role,
+                      content: m.content,
+                    })),
+                }),
+              });
+              if (claudeRes.ok) {
+                const data = await claudeRes.json();
+                const responseText = data.content?.find((item: any) => item.type === 'text')?.text;
+                if (responseText) {
+                  return res.json({
+                    text: responseText,
+                    model: 'Claude (Anthropic)',
+                    provider: 'Anthropic Cloud (Direct API)',
+                    isLive: true,
+                    status: 'success',
+                  });
+                }
+              } else {
+                console.warn('Claude API returned:', claudeRes.status, await claudeRes.text());
+              }
+            } catch (err: any) {
+              console.warn('Claude direct API call notice:', err?.message || err);
+            }
+          }
+
+          if (modelId === 'qwen' && (userKeys.qwen || process.env.QWEN_API_KEY)) {
+            try {
+              const qwenKey = (userKeys.qwen || process.env.QWEN_API_KEY || '').trim();
+              const qwenRes = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${qwenKey}`,
+                },
+                body: JSON.stringify({
+                  model: process.env.QWEN_MODEL || 'qwen-plus',
+                  messages: [
+                    { role: 'system', content: systemInstruction || modelPersonas.qwen },
+                    ...conversation.map((m: any) => ({
+                      role: m.role === 'ai' ? 'assistant' : m.role,
+                      content: m.content,
+                    })),
+                  ],
+                  temperature: temperature || 0.7,
+                }),
+              });
+              if (qwenRes.ok) {
+                const data = await qwenRes.json();
+                const responseText = data.choices?.[0]?.message?.content;
+                if (responseText) {
+                  return res.json({
+                    text: responseText,
+                    model: 'Qwen 2.5 (Alibaba)',
+                    provider: 'Alibaba Cloud (Direct API)',
+                    isLive: true,
+                    status: 'success',
+                  });
+                }
+              } else {
+                console.warn('Qwen API returned:', qwenRes.status, await qwenRes.text());
+              }
+            } catch (err: any) {
+              console.warn('Qwen direct API call notice:', err?.message || err);
             }
           }
         } catch (err: any) {
@@ -587,7 +676,8 @@ async function startServer() {
 
       const modelNames: Record<string, string> = {
         gemini: 'Google Gemini (Flix Grim Auto)',
-        chatgpt: 'ChatGPT (OpenAI GPT-4o)',
+        chatgpt: 'GPT-5 (OpenAI)',
+        claude: 'Claude (Anthropic)',
         kimi: 'Kimi AI (Moonshot)',
         deepseek: 'DeepSeek (R1/V3)',
         qwen: 'Qwen 2.5 (Alibaba)',

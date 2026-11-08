@@ -40,8 +40,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const defaultSettings: AppSettings = {
       geminiKey: '',
       chatgptKey: '',
+      claudeKey: '',
       kimiKey: '',
       deepseekKey: '',
+      qwenKey: '',
       groqKey: '',
       glmKey: '',
       systemInstruction: '',
@@ -49,7 +51,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       theme: 'dark',
       soundEnabled: true,
       streamEnabled: true,
-      activeModels: ['gemini', 'chatgpt', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
+      activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
     };
     setFormData(defaultSettings);
     onSaveSettings(defaultSettings);
@@ -65,9 +67,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     },
     {
       id: 'chatgptKey',
-      label: 'ChatGPT (OpenAI GPT-4o) API Key',
+      label: 'GPT-5 (OpenAI) API Key',
       placeholder: 'sk-proj-...',
-      desc: 'Direct OpenAI inference for GPT-4o and advanced multimodal reasoning.',
+      desc: 'Direct OpenAI inference for GPT-5 and advanced reasoning.',
+    },
+    {
+      id: 'claudeKey',
+      label: 'Claude (Anthropic) API Key',
+      placeholder: 'sk-ant-...',
+      desc: 'Anthropic Claude reasoning and long-context assistance.',
     },
     {
       id: 'kimiKey',
@@ -80,6 +88,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       label: 'DeepSeek (R1/V3) API Key',
       placeholder: 'sk-...',
       desc: 'DeepSeek deep mathematical reasoning & chain-of-thought analysis.',
+    },
+    {
+      id: 'qwenKey',
+      label: 'Qwen (Alibaba) API Key',
+      placeholder: 'sk-...',
+      desc: 'Qwen coding, mathematics, and multilingual inference.',
     },
     {
       id: 'groqKey',

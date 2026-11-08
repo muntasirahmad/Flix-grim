@@ -51,6 +51,17 @@ export const MODELS: ModelOption[] = [
     supportsThinking: false,
   },
   {
+    id: 'claude',
+    name: 'Claude (Anthropic)',
+    provider: 'Anthropic',
+    badge: 'PRO',
+    badgeColor: 'bg-gradient-to-r from-orange-500/20 to-amber-500/20 text-orange-400 border-orange-500/40',
+    description: 'Careful, capable reasoning and long-context assistance from Anthropic.',
+    maxTokens: '200K Context',
+    isPro: true,
+    supportsThinking: true,
+  },
+  {
     id: 'groq',
     name: 'Groq (Llama 3.3)',
     provider: 'Groq LPUs',
@@ -65,7 +76,7 @@ export const MODELS: ModelOption[] = [
   // --- PAID / PRO MODELS (Requires Active Subscription) ---
   {
     id: 'chatgpt',
-    name: 'ChatGPT (OpenAI GPT-4o)',
+    name: 'GPT-5 (OpenAI)',
     provider: 'OpenAI',
     badge: 'PRO',
     badgeColor: 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-400 border-amber-500/40',
@@ -127,7 +138,7 @@ export const STARTER_PROMPTS = [
   },
   {
     icon: '🧠',
-    label: 'DeepSeek R1 vs GPT-4o',
-    prompt: 'Compare DeepSeek R1 cold-start reasoning with OpenAI GPT-4o reasoning tokens.',
+    label: 'DeepSeek R1 vs GPT-5',
+    prompt: 'Compare DeepSeek R1 reasoning with OpenAI GPT-5 reasoning.',
   },
 ];
