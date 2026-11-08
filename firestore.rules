@@ -1,0 +1,102 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default-deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User profile validation
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+        data.keys().hasOnly(['uid', 'email', 'displayName', 'photoUrl', 'isPro', 'planId', 'createdAt', 'updatedAt']) &&
+        data.uid is string && data.uid == request.auth.uid &&
+        data.email is string && data.email.size() <= 200 &&
+        (!('displayName' in data) || (data.displayName is string && data.displayName.size() <= 100)) &&
+        (!('isPro' in data) || data.isPro is bool);
+    }
+
+    // Chat Session validation
+    function isValidSession(data, userId) {
+      return data.keys().hasAll(['id', 'userId', 'title', 'modelId']) &&
+        data.keys().hasOnly(['id', 'userId', 'title', 'modelId', 'createdAt', 'updatedAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.userId is string && data.userId == userId &&
+        data.title is string && data.title.size() <= 200 &&
+        data.modelId is string && data.modelId.size() <= 64;
+    }
+
+    // Chat Message validation
+    function isValidMessage(data, chatId) {
+      return data.keys().hasAll(['id', 'chatId', 'sender', 'text']) &&
+        data.keys().hasOnly(['id', 'chatId', 'sender', 'text', 'modelName', 'timestamp', 'createdAt']) &&
+        data.id is string && data.id.size() <= 128 &&
+        data.chatId is string && data.chatId == chatId &&
+        data.sender in ['user', 'ai'] &&
+        data.text is string && data.text.size() <= 50000;
+    }
+
+    // Google Chat Space validation
+    function isValidSpace(data, userId) {
+      return data.keys().hasAll(['userId', 'spaceName', 'displayName']) &&
+        data.keys().hasOnly(['userId', 'spaceName', 'displayName', 'spaceType', 'syncedAt']) &&
+        data.userId is string && data.userId == userId &&
+        data.spaceName is string && data.spaceName.size() <= 256 &&
+        data.displayName is string && data.displayName.size() <= 100;
+    }
+
+    // User profiles collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // PII isolation: no blanket listing of user profiles
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == existing().uid;
+      allow delete: if isOwner(userId);
+
+      // Chat sessions subcollection
+      match /sessions/{sessionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(sessionId) && isValidSession(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(sessionId) && isValidSession(incoming(), userId) && incoming().id == existing().id;
+        allow delete: if isOwner(userId) && isValidId(sessionId);
+
+        // Messages subcollection
+        match /messages/{messageId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidId(messageId) && isValidMessage(incoming(), sessionId);
+          allow update: if isOwner(userId) && isValidId(messageId) && isValidMessage(incoming(), sessionId) && incoming().id == existing().id;
+          allow delete: if isOwner(userId) && isValidId(messageId);
+        }
+      }
+
+      // Synced Google Chat Spaces subcollection
+      match /googleChatSpaces/{spaceId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(spaceId) && isValidSpace(incoming(), userId);
+        allow update: if isOwner(userId) && isValidId(spaceId) && isValidSpace(incoming(), userId);
+        allow delete: if isOwner(userId) && isValidId(spaceId);
+      }
+    }
+  }
+}

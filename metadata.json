@@ -1,0 +1,6 @@
+{
+  "name": "Flix Grim AI - Multi-Model AI Assistant",
+  "description": "An intelligent multi-model AI assistant with Gemini, DeepSeek, Groq, Qwen, chat history, custom prompts, and full customization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
