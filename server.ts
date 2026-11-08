@@ -31,6 +31,7 @@ async function startServer() {
     res.json({
       status: 'ok',
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
+      hasGlmKey: Boolean(process.env.GLM_API_KEY && process.env.GLM_API_KEY !== 'MY_GLM_API_KEY'),
       hasCloudSql: Boolean(process.env.SQL_HOST && process.env.SQL_DB_NAME),
       hasFirebase: true,
       app: 'Flix Grim AI',
@@ -243,7 +244,7 @@ async function startServer() {
         deepseek: 'DeepSeek (R1/V3)',
         qwen: 'Qwen 2.5 (Alibaba)',
         groq: 'Groq (Llama 3.3)',
-        glm: 'GLM-4 (Zhipu AI)',
+        glm: 'GLM-5 (Z.ai)',
       };
 
       const selectedName = modelNames[modelId] || 'Flix Grim Auto';
@@ -263,7 +264,7 @@ async function startServer() {
         kimi:
           'You are Kimi AI by Moonshot. You are a long-context research specialist who provides meticulous, comprehensive, and clear answers.',
         glm:
-          'You are GLM-4 by Zhipu AI. You are a bilingual reasoning powerhouse with deep expertise in full-stack engineering, algorithms, and logic.',
+          'You are GLM-5 by Z.ai. You are a bilingual reasoning powerhouse with deep expertise in coding, full-stack engineering, algorithms, and long-horizon agentic tasks. Answer naturally in Hindi, Hinglish, or English.',
       };
 
       // 1. Check if user provided direct Provider Key (Groq, DeepSeek, OpenAI, Kimi, GLM)
@@ -426,9 +427,53 @@ async function startServer() {
         }
       }
 
+      if (modelId === 'glm' && (userKeys.glm || process.env.GLM_API_KEY)) {
+        try {
+          const glmApiKey = (userKeys.glm || process.env.GLM_API_KEY || '').trim();
+          const glmBaseUrl = (
+            process.env.GLM_API_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4'
+          ).replace(/\/+$/, '');
+          const glmRes = await fetch(`${glmBaseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${glmApiKey}`,
+            },
+            body: JSON.stringify({
+              model: process.env.GLM_MODEL || 'glm-5',
+              messages: [
+                { role: 'system', content: systemInstruction || modelPersonas.glm },
+                ...conversation.map((m: any) => ({
+                  role: m.role === 'ai' ? 'assistant' : m.role,
+                  content: m.content,
+                })),
+              ],
+              temperature: temperature || 0.7,
+            }),
+          });
+
+          if (glmRes.ok) {
+            const data = await glmRes.json();
+            const responseText = data.choices?.[0]?.message?.content;
+            if (responseText) {
+              return res.json({
+                text: responseText,
+                model: 'GLM-5 (Z.ai)',
+                provider: 'Z.ai GLM-5 (Direct API)',
+                isLive: true,
+                status: 'success',
+              });
+            }
+          } else {
+            console.warn('GLM API returned:', glmRes.status, await glmRes.text());
+          }
+        } catch (err: any) {
+          console.warn('GLM direct API call notice:', err?.message || err);
+        }
+      }
+
       // 2. Google Gemini Live Routing for all 7 models
-      const DEFAULT_GEMINI_KEY = 'AQ.Ab8RN6JYPk7exf3HPtLHUBrmTrgcntDXsR-ueCA0g-d4q-KPyA';
-      const geminiApiKey = (userKeys.gemini || process.env.GEMINI_API_KEY || DEFAULT_GEMINI_KEY).trim();
+      const geminiApiKey = (userKeys.gemini || process.env.GEMINI_API_KEY || '').trim();
       const isValidGeminiKey =
         geminiApiKey && geminiApiKey !== 'MY_GEMINI_API_KEY' && geminiApiKey.length > 10;
 
@@ -444,7 +489,7 @@ async function startServer() {
         });
       }
 
-      if (isValidGeminiKey) {
+      if (modelId !== 'glm' && isValidGeminiKey) {
         try {
           const ai = new GoogleGenAI({
             apiKey: geminiApiKey,
@@ -547,7 +592,7 @@ async function startServer() {
         deepseek: 'DeepSeek (R1/V3)',
         qwen: 'Qwen 2.5 (Alibaba)',
         groq: 'Groq (Llama 3.3)',
-        glm: 'GLM-4 (Zhipu AI)',
+        glm: 'GLM-5 (Z.ai)',
       };
 
       const selectedName = modelNames[modelId] || 'Flix Grim Auto';
@@ -565,8 +610,7 @@ async function startServer() {
       }
 
       // 1. Check Gemini Cloud Stream with user's verified active key
-      const DEFAULT_GEMINI_KEY = 'AQ.Ab8RN6JYPk7exf3HPtLHUBrmTrgcntDXsR-ueCA0g-d4q-KPyA';
-      const geminiApiKey = (userKeys.gemini || process.env.GEMINI_API_KEY || DEFAULT_GEMINI_KEY).trim();
+      const geminiApiKey = (userKeys.gemini || process.env.GEMINI_API_KEY || '').trim();
       const isValidGeminiKey =
         geminiApiKey && geminiApiKey !== 'MY_GEMINI_API_KEY' && geminiApiKey.length > 10;
 
@@ -616,6 +660,73 @@ async function startServer() {
           return res.end();
         } catch (streamGeminiErr: any) {
           console.warn('Gemini cloud stream fallback:', streamGeminiErr?.message || streamGeminiErr);
+        }
+      }
+
+      if (modelId === 'glm' && (userKeys.glm || process.env.GLM_API_KEY)) {
+        try {
+          const glmApiKey = (userKeys.glm || process.env.GLM_API_KEY || '').trim();
+          const glmBaseUrl = (
+            process.env.GLM_API_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4'
+          ).replace(/\/+$/, '');
+          const glmRes = await fetch(`${glmBaseUrl}/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${glmApiKey}`,
+            },
+            body: JSON.stringify({
+              model: process.env.GLM_MODEL || 'glm-5',
+              messages: [
+                {
+                  role: 'system',
+                  content:
+                    systemInstruction ||
+                    `You are ${selectedName}. Provide high-quality bilingual answers in Hindi, Hinglish, or English.`,
+                },
+                ...conversation.map((m: any) => ({
+                  role: m.role === 'ai' ? 'assistant' : m.role,
+                  content: m.content,
+                })),
+              ],
+              stream: true,
+            }),
+          });
+
+          if (glmRes.ok && glmRes.body) {
+            const reader = glmRes.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const events = buffer.split('\n\n');
+              buffer = events.pop() || '';
+              for (const event of events) {
+                const dataLine = event
+                  .split('\n')
+                  .find((line) => line.startsWith('data:'));
+                if (!dataLine) continue;
+                const data = dataLine.slice(5).trim();
+                if (data === '[DONE]') continue;
+                try {
+                  const chunk = JSON.parse(data);
+                  const token = chunk.choices?.[0]?.delta?.content;
+                  if (token) res.write(`data: ${JSON.stringify({ text: token })}\n\n`);
+                } catch {
+                  // Ignore incomplete provider event fragments.
+                }
+              }
+            }
+            res.write(`data: ${JSON.stringify({ done: true, model: selectedName })}\n\n`);
+            return res.end();
+          }
+          if (!glmRes.ok) {
+            console.warn('GLM streaming API returned:', glmRes.status, await glmRes.text());
+          }
+        } catch (glmStreamErr: any) {
+          console.warn('GLM cloud stream fallback:', glmStreamErr?.message || glmStreamErr);
         }
       }
 

@@ -59,7 +59,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     {
       id: 'geminiKey',
       label: 'Google Gemini API Key',
-      placeholder: 'AQ.Ab8RN... (Connected & Active)',
+      placeholder: 'Enter Gemini API key...',
       desc: 'Powers Google Gemini (Flix Grim Auto) with real-time web search grounding.',
       badge: formData.geminiKey ? 'Active & Verified' : 'Cloud Key Ready',
     },
@@ -89,9 +89,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     },
     {
       id: 'glmKey',
-      label: 'GLM-4 (Zhipu AI) API Key',
+      label: 'GLM-5 (Z.ai) API Key',
       placeholder: 'key.id...',
-      desc: 'Zhipu AI GLM-4 enterprise bilingual and agentic execution.',
+      desc: 'Z.ai GLM-5 bilingual reasoning for coding and agentic execution.',
     },
   ];
 
@@ -264,7 +264,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 { name: 'ChatGPT (OpenAI GPT-4o)', tier: 'PRO' },
                 { name: 'DeepSeek (R1/V3)', tier: 'PRO' },
                 { name: 'Kimi AI (Moonshot)', tier: 'PRO' },
-                { name: 'GLM-4 (Zhipu AI)', tier: 'PRO' },
+                { name: 'GLM-5 (Z.ai)', tier: 'PRO' },
               ].map((m, idx) => (
                 <div
                   key={idx}

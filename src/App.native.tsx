@@ -4,7 +4,7 @@
  * 
  * Features:
  * 1. Native Voice-to-Text Speech Recognition (@react-native-voice/voice)
- * 2. 7 Multi-Model Engine (Free: Gemini, Qwen, Groq; PRO: ChatGPT, DeepSeek, Kimi, GLM-4)
+ * 2. 7 Multi-Model Engine (Free: Gemini, Qwen, Groq; PRO: ChatGPT, DeepSeek, Kimi, GLM-5)
  * 3. Background Async AI Processing & Sleek Typing Dots (Non-blocking UI)
  * 4. Automated UPI Payments (Yasmin Pravin / 8294976432@ptsbi - ₹10/mo & ₹100/yr)
  * 5. AppState Lifecycle Listener: Auto-reset to New Chat on exit + Post-payment auto-verification
@@ -52,7 +52,7 @@ export const MODELS: ModelOption[] = [
   { id: 'chatgpt', name: 'ChatGPT (OpenAI GPT-4o)', provider: 'OpenAI', badge: 'PRO', isPro: true },
   { id: 'deepseek', name: 'DeepSeek (R1/V3)', provider: 'DeepSeek AI', badge: 'PRO', isPro: true },
   { id: 'kimi', name: 'Kimi AI (Moonshot)', provider: 'Moonshot AI', badge: 'PRO', isPro: true },
-  { id: 'glm', name: 'GLM-4 (Zhipu AI)', provider: 'Zhipu AI', badge: 'PRO', isPro: true },
+  { id: 'glm', name: 'GLM-5 (Z.ai)', provider: 'Z.ai', badge: 'PRO', isPro: true },
 ];
 
 // --- UPI PAYMENT CONFIGURATION ---
@@ -236,7 +236,7 @@ export default function App() {
 
       Alert.alert(
         'Flix Grim PRO Unlocked!',
-        'Your subscription is active. All 7 models (ChatGPT GPT-4o, DeepSeek R1, Kimi, GLM-4) are now fully unlocked!'
+        'Your subscription is active. All 7 models (ChatGPT GPT-4o, DeepSeek R1, Kimi, GLM-5) are now fully unlocked!'
       );
     } catch (e) {
       console.warn('Error saving PRO state:', e);
@@ -454,7 +454,7 @@ export default function App() {
             <Text style={styles.sparkIcon}>✦</Text>
             <Text style={styles.emptyText}>Any new ideas to explore?</Text>
             <Text style={styles.emptySubtext}>
-              {isProUser ? 'Flix Grim PRO Active · Voice & 7 Engines Ready' : '3 Free Engines · Upgrade for ChatGPT, DeepSeek, Kimi & GLM-4'}
+              {isProUser ? 'Flix Grim PRO Active · Voice & 7 Engines Ready' : '3 Free Engines · Upgrade for ChatGPT, DeepSeek, Kimi & GLM-5'}
             </Text>
           </View>
         ) : (
@@ -590,7 +590,7 @@ export default function App() {
             </View>
 
             <Text style={styles.upgradeSubtitle}>
-              Unlock ChatGPT (GPT-4o), DeepSeek R1, Kimi AI & GLM-4
+              Unlock ChatGPT (GPT-4o), DeepSeek R1, Kimi AI & GLM-5
             </Text>
 
             {/* Target Account UPI Info */}
@@ -709,7 +709,7 @@ export default function App() {
                 onChangeText={setGroqKey}
               />
 
-              <Text style={styles.inputLabel}>GLM-4 (Zhipu AI) API Key</Text>
+              <Text style={styles.inputLabel}>GLM-5 (Z.ai) API Key</Text>
               <TextInput
                 style={styles.settingInput}
                 placeholder="api-key..."

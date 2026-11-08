@@ -39,7 +39,7 @@ const INITIAL_SESSIONS: ChatSession[] = [
 
 To build an ultra-responsive multi-model AI assistant:
 
-1. **Unified Interface**: Seamlessly switch between Gemini 3.8, DeepSeek R1, Groq Llama 3.3, Qwen 2.5, and GLM-4.
+1. **Unified Interface**: Seamlessly switch between Gemini 3.8, DeepSeek R1, Groq Llama 3.3, Qwen 2.5, and GLM-5.
 2. **Context Preservation**: Persistent history sessions with search, rename, and export.
 3. **Optimized Inference**: Real server-side Google Gemini integration with smart local fallback.
 
@@ -82,7 +82,7 @@ All 7 models in Flix Grim are synchronized and ready to answer your questions!`,
   },
 ];
 
-const DEFAULT_GEMINI_KEY = 'AQ.Ab8RN6JYPk7exf3HPtLHUBrmTrgcntDXsR-ueCA0g-d4q-KPyA';
+const DEFAULT_GEMINI_KEY = '';
 
 const DEFAULT_SETTINGS: AppSettings = {
   geminiKey: DEFAULT_GEMINI_KEY,

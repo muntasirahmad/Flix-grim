@@ -120,7 +120,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
             Unlock <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500">Flix Grim PRO</span>
           </h2>
           <p className="text-xs text-gray-400 mt-1">
-            Instant access to ChatGPT GPT-4o, DeepSeek R1, Kimi AI & GLM-4
+            Instant access to ChatGPT GPT-4o, DeepSeek R1, Kimi AI & GLM-5
           </p>
         </div>
 
@@ -245,7 +245,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               'ChatGPT (OpenAI GPT-4o) multimodal intelligence',
               'DeepSeek R1 deep reasoning with chain-of-thought analysis',
               'Kimi AI (Moonshot) ultra-long context synthesis',
-              'GLM-4 enterprise agentic workflows',
+              'GLM-5 bilingual enterprise agentic workflows',
               'Priority queue with zero waiting time',
             ].map((perk, i) => (
               <div key={i} className="flex items-center space-x-2 text-xs text-gray-300">

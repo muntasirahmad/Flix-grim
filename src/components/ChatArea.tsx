@@ -82,7 +82,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             Any new ideas to explore?
           </h2>
           <p className="text-sm text-gray-400 max-w-md mb-8">
-            Flix Grim connects you to Google Gemini, ChatGPT GPT-4o, DeepSeek R1, Kimi AI, Qwen 2.5, Groq & GLM-4.
+            Flix Grim connects you to Google Gemini, ChatGPT GPT-4o, DeepSeek R1, Kimi AI, Qwen 2.5, Groq & GLM-5.
           </p>
 
           <div className="w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-left">
