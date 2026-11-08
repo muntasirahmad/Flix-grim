@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "Flix Grim",
+    "slug": "flix-grim",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.flixgrim.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#111827"
+      }
+    }
+  }
+}
