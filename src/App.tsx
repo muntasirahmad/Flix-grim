@@ -86,6 +86,7 @@ const DEFAULT_GEMINI_KEY = '';
 
 const DEFAULT_SETTINGS: AppSettings = {
   geminiKey: DEFAULT_GEMINI_KEY,
+  githubModelsKey: '',
   chatgptKey: '',
   claudeKey: '',
   kimiKey: '',
@@ -98,7 +99,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   theme: 'dark',
   soundEnabled: true,
   streamEnabled: true,
-  activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
+  activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'deepseek-v1', 'qwen', 'groq', 'glm', 'llama', 'mistral', 'phi', 'cohere', 'grok'],
 };
 
 export default function App() {
@@ -387,6 +388,7 @@ export default function App() {
             temperature: settings.temperature,
             userKeys: {
               gemini: settings.geminiKey,
+              githubModels: settings.githubModelsKey,
               chatgpt: settings.chatgptKey,
               claude: settings.claudeKey,
               kimi: settings.kimiKey,
@@ -458,6 +460,7 @@ export default function App() {
             temperature: settings.temperature,
             userKeys: {
               gemini: settings.geminiKey,
+              githubModels: settings.githubModelsKey,
               chatgpt: settings.chatgptKey,
               claude: settings.claudeKey,
               kimi: settings.kimiKey,

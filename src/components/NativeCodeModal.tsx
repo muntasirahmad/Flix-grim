@@ -65,10 +65,17 @@ export const MODELS: ModelOption[] = [
   { id: 'groq', name: 'Groq (Llama 3.3)', provider: 'Groq LPUs', badge: 'Ultra Fast', isPro: false },
 
   // PRO Models (Requires Active Subscription)
-  { id: 'chatgpt', name: 'ChatGPT (OpenAI GPT-4o)', provider: 'OpenAI', badge: 'PRO', isPro: true },
+  { id: 'chatgpt', name: 'GPT-5 (OpenAI)', provider: 'OpenAI', badge: 'PRO', isPro: true },
+  { id: 'claude', name: 'Claude (Anthropic)', provider: 'Anthropic', badge: 'PRO', isPro: true },
   { id: 'deepseek', name: 'DeepSeek (R1/V3)', provider: 'DeepSeek AI', badge: 'PRO', isPro: true },
+  { id: 'deepseek-v1', name: 'DeepSeek V1', provider: 'DeepSeek AI', badge: 'PRO', isPro: true },
   { id: 'kimi', name: 'Kimi AI (Moonshot)', provider: 'Moonshot AI', badge: 'PRO', isPro: true },
   { id: 'glm', name: 'GLM-5 (Z.ai)', provider: 'Z.ai', badge: 'PRO', isPro: true },
+  { id: 'llama', name: 'Meta Llama 3.3', provider: 'Meta via GitHub Models', badge: 'GitHub Models', isPro: false },
+  { id: 'mistral', name: 'Mistral Large', provider: 'Mistral via GitHub Models', badge: 'GitHub Models', isPro: false },
+  { id: 'phi', name: 'Microsoft Phi-4', provider: 'Microsoft via GitHub Models', badge: 'GitHub Models', isPro: false },
+  { id: 'cohere', name: 'Cohere Command R+', provider: 'Cohere via GitHub Models', badge: 'GitHub Models', isPro: false },
+  { id: 'grok', name: 'xAI Grok', provider: 'xAI via GitHub Models', badge: 'GitHub Models', isPro: false },
 ];
 
 // --- UPI PAYMENT CONFIGURATION ---

@@ -39,6 +39,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleReset = () => {
     const defaultSettings: AppSettings = {
       geminiKey: '',
+      githubModelsKey: '',
       chatgptKey: '',
       claudeKey: '',
       kimiKey: '',
@@ -51,7 +52,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       theme: 'dark',
       soundEnabled: true,
       streamEnabled: true,
-      activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'qwen', 'groq', 'glm'],
+      activeModels: ['gemini', 'chatgpt', 'claude', 'kimi', 'deepseek', 'deepseek-v1', 'qwen', 'groq', 'glm', 'llama', 'mistral', 'phi', 'cohere', 'grok'],
     };
     setFormData(defaultSettings);
     onSaveSettings(defaultSettings);
@@ -70,6 +71,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       label: 'GPT-5 (OpenAI) API Key',
       placeholder: 'sk-proj-...',
       desc: 'Direct OpenAI inference for GPT-5 and advanced reasoning.',
+    },
+    {
+      id: 'githubModelsKey',
+      label: 'GitHub Models Token',
+      placeholder: 'github_pat_...',
+      desc: 'Runs Meta Llama, Mistral, Microsoft Phi, Cohere, and Grok through GitHub Models.',
     },
     {
       id: 'claudeKey',

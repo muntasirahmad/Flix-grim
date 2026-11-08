@@ -32,6 +32,7 @@ export interface ChatSession {
 
 export interface AppSettings {
   geminiKey: string;
+  githubModelsKey: string;
   chatgptKey: string;
   claudeKey: string;
   kimiKey: string;

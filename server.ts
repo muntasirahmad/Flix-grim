@@ -31,6 +31,9 @@ async function startServer() {
     res.json({
       status: 'ok',
       hasGeminiKey: Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'),
+      hasGithubModelsToken: Boolean(
+        process.env.GITHUB_MODELS_TOKEN && process.env.GITHUB_MODELS_TOKEN !== 'MY_GITHUB_MODELS_TOKEN'
+      ),
       hasGlmKey: Boolean(process.env.GLM_API_KEY && process.env.GLM_API_KEY !== 'MY_GLM_API_KEY'),
       hasOpenAiKey: Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'MY_OPENAI_API_KEY'),
       hasAnthropicKey: Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY !== 'MY_ANTHROPIC_API_KEY'),
@@ -246,9 +249,15 @@ async function startServer() {
         claude: 'Claude (Anthropic)',
         kimi: 'Kimi AI (Moonshot)',
         deepseek: 'DeepSeek (R1/V3)',
+        'deepseek-v1': 'DeepSeek V1',
         qwen: 'Qwen 2.5 (Alibaba)',
         groq: 'Groq (Llama 3.3)',
         glm: 'GLM-5 (Z.ai)',
+        llama: 'Meta Llama 3.3',
+        mistral: 'Mistral Large',
+        phi: 'Microsoft Phi-4',
+        cohere: 'Cohere Command R+',
+        grok: 'xAI Grok',
       };
 
       const selectedName = modelNames[modelId] || 'Flix Grim Auto';
@@ -263,6 +272,8 @@ async function startServer() {
           'You are Claude by Anthropic. Be thoughtful, precise, transparent about uncertainty, and helpful. Match the user language (Hindi, Hinglish, or English).',
         deepseek:
           'You are DeepSeek-R1, the leading open reasoning AI. For every reasoning question, you MUST show your internal deliberation inside a <think>...</think> block, followed by the definitive final answer. Fluent in Hindi, Hinglish, and English.',
+        'deepseek-v1':
+          'You are DeepSeek V1, a precise reasoning and coding assistant. Answer clearly in Hindi, Hinglish, or English and do not invent facts.',
         qwen:
           'You are Qwen 2.5 developed by Alibaba Cloud. You excel at multilingual depth, advanced programming, and cross-cultural understanding. Answer warmly in Hindi, Hinglish, or English.',
         groq:
@@ -271,6 +282,16 @@ async function startServer() {
           'You are Kimi AI by Moonshot. You are a long-context research specialist who provides meticulous, comprehensive, and clear answers.',
         glm:
           'You are GLM-5 by Z.ai. You are a bilingual reasoning powerhouse with deep expertise in coding, full-stack engineering, algorithms, and long-horizon agentic tasks. Answer naturally in Hindi, Hinglish, or English.',
+        llama:
+          'You are Meta Llama, an open-weight general assistant. Be helpful, concise, and strong at coding. Answer in Hindi, Hinglish, or English as appropriate.',
+        mistral:
+          'You are Mistral Large, a multilingual reasoning and coding assistant. Be precise and practical.',
+        phi:
+          'You are Microsoft Phi-4, a compact reasoning and coding specialist. Show clear, reliable solutions.',
+        cohere:
+          'You are Cohere Command R+, an enterprise multilingual assistant. Ground answers in the provided context and be clear about uncertainty.',
+        grok:
+          'You are xAI Grok, a direct and conversational assistant. Give useful, accurate answers without unnecessary filler.',
       };
 
       // 1. Check if user provided a direct provider key.
@@ -316,7 +337,7 @@ async function startServer() {
         }
       }
 
-      if (modelId === 'deepseek' && userKeys.deepseek) {
+      if ((modelId === 'deepseek' || modelId === 'deepseek-v1') && userKeys.deepseek) {
         try {
           const dsRes = await fetch('https://api.deepseek.com/chat/completions', {
             method: 'POST',
@@ -325,7 +346,9 @@ async function startServer() {
               Authorization: `Bearer ${userKeys.deepseek}`,
             },
             body: JSON.stringify({
-              model: 'deepseek-reasoner',
+              model: modelId === 'deepseek-v1'
+                ? process.env.DEEPSEEK_V1_MODEL || 'deepseek-chat'
+                : 'deepseek-reasoner',
               messages: [
                 {
                   role: 'system',
@@ -465,6 +488,68 @@ async function startServer() {
                     isLive: true,
                     status: 'success',
                   });
+                }
+
+                const githubModelNames: Record<string, string> = {
+                  llama: 'meta-llama-3.1-8b-instruct',
+                  mistral: 'Mistral-Large-2411',
+                  phi: 'Phi-4',
+                  cohere: 'Cohere-command-r-plus',
+                  grok: 'xai-grok-3-mini',
+                };
+                if (githubModelNames[modelId] && (userKeys.githubModels || process.env.GITHUB_MODELS_TOKEN)) {
+                  try {
+                    const githubToken = (
+                      userKeys.githubModels ||
+                      process.env.GITHUB_MODELS_TOKEN ||
+                      ''
+                    ).trim();
+                    const githubModelsRes = await fetch(
+                      'https://models.inference.ai.azure.com/chat/completions',
+                      {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${githubToken}`,
+                        },
+                        body: JSON.stringify({
+                          model: githubModelNames[modelId],
+                          messages: [
+                            {
+                              role: 'system',
+                              content: systemInstruction || modelPersonas[modelId],
+                            },
+                            ...conversation.map((m: any) => ({
+                              role: m.role === 'ai' ? 'assistant' : m.role,
+                              content: m.content,
+                            })),
+                          ],
+                          temperature: temperature || 0.7,
+                        }),
+                      }
+                    );
+                    if (githubModelsRes.ok) {
+                      const data = await githubModelsRes.json();
+                      const responseText = data.choices?.[0]?.message?.content;
+                      if (responseText) {
+                        return res.json({
+                          text: responseText,
+                          model: selectedName,
+                          provider: 'GitHub Models',
+                          isLive: true,
+                          status: 'success',
+                        });
+                      }
+                    } else {
+                      console.warn(
+                        'GitHub Models API returned:',
+                        githubModelsRes.status,
+                        await githubModelsRes.text()
+                      );
+                    }
+                  } catch (err: any) {
+                    console.warn('GitHub Models API call notice:', err?.message || err);
+                  }
                 }
               } else {
                 console.warn('Qwen API returned:', qwenRes.status, await qwenRes.text());
@@ -680,9 +765,15 @@ async function startServer() {
         claude: 'Claude (Anthropic)',
         kimi: 'Kimi AI (Moonshot)',
         deepseek: 'DeepSeek (R1/V3)',
+        'deepseek-v1': 'DeepSeek V1',
         qwen: 'Qwen 2.5 (Alibaba)',
         groq: 'Groq (Llama 3.3)',
         glm: 'GLM-5 (Z.ai)',
+        llama: 'Meta Llama 3.3',
+        mistral: 'Mistral Large',
+        phi: 'Microsoft Phi-4',
+        cohere: 'Cohere Command R+',
+        grok: 'xAI Grok',
       };
 
       const selectedName = modelNames[modelId] || 'Flix Grim Auto';
